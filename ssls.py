@@ -12,12 +12,12 @@ import time
 
 
 # Parameters
-video_file = "ssls.mp4"
+video_file = "ssls_TIC_470710327.mp4"
 
-Frames = 300       # number of iterations/frames. Proportional to this program's run time and to the lenght of the animation.
+Frames = 2500       # number of iterations/frames. Proportional to this program's run time and to the lenght of the animation.
 FPS = 30           # frames per second in video. Proportional to the velocity of the objects in the animation. Inverse proportional to lenght of video.
-DT = 20            # time difference for one iteration [s]. Proportional to the velocity of the objects in the animation. 3600 seems a good value for precise enough orbit calculations.
-Sampling_rate = 10  # Calculating the physics is much faster than animating it. Therefore only 1/Sampling_rate of the calculated iterations is used as frame in the animation.
+DT = 1            # time difference for one iteration [s]. Proportional to the velocity of the objects in the animation. 3600 seems a good value for precise enough orbit calculations.
+Sampling_rate = 2000  # Calculating the physics is much faster than animating it. Therefore only 1/Sampling_rate of the calculated iterations is used as frame in the animation.
 Iterations = Frames * Sampling_rate
 
 G  = 6.67430e-11     # gravitational constant [m**3/kg/s**2] +/- 0.00015
@@ -29,11 +29,11 @@ ER = 6.378135e6      # earth radius [m]
 EM = 5.9720e24       # earth mass [kg]
 EV = 2.97852e4       # earth orbital velocity [m/s] (if orbit was circular)
 
-Scale_ecl = 0.1 * AU      # height of eclipse view plotting window in meters. Middle of window is (0.0, 0.0)
+Scale_ecl = 0.9 * AU      # height of eclipse view plotting window in meters. Middle of window is (0.0, 0.0)
 StarScale_ecl = 1.0       # animate stars with StarScale_ecl times enlarged radius.
 PlanetScale_ecl = 100.0   # animate planets with PlanetScale_ecl times enlarged radius.
-Scale_top = 1.1 * AU      # height of top view plotting window in meters. Middle of window is (0.0, 0.0)
-StarScale_top = 10.0       # animate stars with StarScale_top times enlarged radius.
+Scale_top = 0.9 * AU      # height of top view plotting window in meters. Middle of window is (0.0, 0.0)
+StarScale_top = 1.0       # animate stars with StarScale_top times enlarged radius.
 PlanetScale_top = 100.0   # animate planets with PlanetScale_top times enlarged radius.
 
 
@@ -57,7 +57,7 @@ class Body():
         self.area_2d = np.pi * radius**2                    # [m**2]
         self.brightness = brightness                        # luminosity per (apparent) area [W/m**2]
         self.luminosity = luminosity                        # [W]
-        self.positions = np.zeros((Iterations,3))               # position fpr each frame
+        self.positions = np.zeros((Iterations,3))           # position for each frame
         self.positions[0] = startposition                   # [m] initial position
         self.velocity = velocity                            # [m/s] (np.array)
         self.color = color                                  # (R, G, B)  each between 0 and 1
@@ -73,7 +73,7 @@ class Body():
 
     def eclipsed_by(self, body, frame):
         if body.positions[frame][1] < self.positions[frame][1]:  # body nearer to viewpoint than self?
-            d = distance_2d(body, self, frame)
+            d = distance_2d_ecl(body, self, frame)
             if d < self.radius + body.radius:  # does body eclipse self?
                 if d < self.radius - body.radius:
                     return body.area_2d  # full eclipse!
@@ -89,16 +89,46 @@ class Body():
 
 
 def init_bodies(bodies):
-    bodies.append(Body(name="Binary1",
-                       mass=SM, radius=SR,
-                       startposition=np.array([0.0, 0.0, 0.0]), velocity=np.array([0.0, 0.0, 0.0]),
-                       luminosity=SL, color=(0.99, 0.99, 0.01),
+    bodies.append(Body(name="TIC 470710327 A",
+                       mass=6.5*SM, radius=2.0*SR,
+                       startposition=np.array([0, 3620798086, 0]), velocity=np.array([-235000, -88820, -12688.0]),
+                       luminosity=2**3.14*SL, color=(0.99, 0.99, 0.01),
                        extrascale_ecl=StarScale_ecl, extrascale_top=StarScale_top))
-    bodies.append(Body(name="Binary2",
-                       mass=SM*0.5, radius=SR*0.5,
-                       startposition=np.array([0.1*AU, -1*AU, 0.0]), velocity=np.array([-10*EV, 0.0, 0.0]),
-                       luminosity=SL * 0.5, color=(0.90, 0.50, 0.01),
+    bodies.append(Body(name="TIC 470710327 B",
+                       mass=5.9*SM, radius=1.5*SR,
+                       startposition=np.array([0, -3620798086, 0]), velocity=np.array([235000, -88820, -12688.0]),
+                       luminosity=2**3.08*SL, color=(0.01, 0.01, 0.99),
                        extrascale_ecl=StarScale_ecl, extrascale_top=StarScale_top))
+    # bodies.append(Body(name="TIC 470710327 AohneC",
+    #                    mass=6.5*SM, radius=2.0*SR,
+    #                    startposition=np.array([0.0, 3620798086, 0.0]), velocity=np.array([-x, 0, 0.0]),
+    #                    luminosity=SL, color=(0.99, 0.99, 0.01),
+    #                    extrascale_ecl=StarScale_ecl, extrascale_top=StarScale_top))
+    # bodies.append(Body(name="TIC 470710327 BohneC",
+    #                    mass=5.9*SM, radius=1.5*SR,
+    #                    startposition=np.array([0.0, -3620798086, 0.0]), velocity=np.array([x, 0, 0.0]),
+    #                    luminosity=SL, color=(0.01, 0.01, 0.99),
+    #                    extrascale_ecl=StarScale_ecl, extrascale_top=StarScale_top))
+    bodies.append(Body(name="TIC 470710327 C",
+                       mass=15.25*SM, radius=3.5*SR,
+                       startposition=np.array([123338343881, 0, 0]), velocity=np.array([0, 85118, 12688.0]), #88820
+                       luminosity=2**4.79*SL, color=(0.99, 0.01, 0.99),
+                       extrascale_ecl=StarScale_ecl, extrascale_top=StarScale_top))
+    # bodies.append(Body(name="TIC 470710327 A+B",
+    #                    mass=12.4*SM, radius=2.0*SR,
+    #                    startposition=np.array([0.0, 0.0, 0.0]), velocity=np.array([0.0, 0.0, 0.0]),
+    #                    luminosity=SL, color=(0.99, 0.99, 0.01),
+    #                    extrascale_ecl=StarScale_ecl, extrascale_top=StarScale_top))
+    # bodies.append(Body(name="demo1-Star1",
+    #                    mass=SM, radius=SR,
+    #                    startposition=np.array([0.0, 0.0, 0.0]), velocity=np.array([0.0, 0.0, 0.0]),
+    #                    luminosity=SL, color=(0.99, 0.99, 0.01),
+    #                    extrascale_ecl=StarScale_ecl, extrascale_top=StarScale_top))
+    # bodies.append(Body(name="demo1-Star2",
+    #                    mass=SM*0.5, radius=SR*0.5,
+    #                    startposition=np.array([0.1*AU, -1*AU, 0.0]), velocity=np.array([-10*EV, 0.0, 0.0]),
+    #                    luminosity=SL * 0.5, color=(0.90, 0.50, 0.01),
+    #                    extrascale_ecl=StarScale_ecl, extrascale_top=StarScale_top))
     # bodies.append(Body(name="Sun", mass=SM, radius=SR, startposition=np.array([0.0, 0.0, 0.0]), velocity=np.array([0.0, 0.0, 0.0]), color=(0.90, 0.90, 0.10), extrascale=StarScale_ecl, luminosity=SL))
     # bodies.append(Body(name="Earth", mass=EM, radius=ER, startposition=np.array([-0.004*AU, -1.0*AU, 0.0]), velocity=np.array([-EV, 0.0, 0.0]), color=(0.20, 0.20, 0.80), extrascale=PlanetScale_ecl))
     # bodies.append(Body(name="Earth", mass=EM, radius=ER, startposition=np.array([1.0 * AU, 0.0 * AU, 0.0 * AU]), velocity=np.array([0.0, -EV, 0.0]), color=(0.20, 0.20, 0.80), extrascale=PlanetScale_ecl))
@@ -111,7 +141,7 @@ def init_plot(sampled_lightcurve):
     xlim = 1.25
     ylim = 1.0
     fig.set_facecolor("black")  # background color outside of ax_eclipse and ax_lightcurve
-    fig.subplots_adjust(left=0, right=1, bottom=0, top=1)  # Positions of the subplots edges, as anim fraction of the figure width.
+    fig.subplots_adjust(left=0, right=1, bottom=0, top=1)  # Positions of the subplots edges, as a fraction of the figure width.
 
     ax_eclipse = plt.subplot2grid(shape=(5, 2), loc=(0, 0), rowspan=4, colspan=1)
 
@@ -149,14 +179,14 @@ def init_plot(sampled_lightcurve):
 
 
 def ideal_velocity(sun, planet):
-# Returns the velocity of the planet that is needed for anim circular orbit around the sun in anim 2 body system.
+# Returns the velocity of the planet that is needed for a circular orbit around the sun in a 2 body system.
 # https://de.wikipedia.org/wiki/Zweik%C3%B6rperproblem#Zeitparameter
-    distance = np.sqrt(np.dot(sun.position - planet.position, sun.position - planet.position))
+    distance = np.sqrt(np.dot(sun.positions[0] - planet.positions[0], sun.positions[0] - planet.positions[0]))
     return np.sqrt(G * (sun.mass + planet.mass) / distance)
 
 
 def ideal_radius(sun, planet, orbital_period=0):
-# Returns the radius of the planet that is needed for anim circular orbit around the sun in anim 2 body system.
+# Returns the radius of the planet that is needed for a circular orbit around the sun in a 2 body system.
 # If the orbital period is not given it is calculated from the planets velocity.
     mass = sun.mass + planet.mass
     if orbital_period > 0:
@@ -166,10 +196,16 @@ def ideal_radius(sun, planet, orbital_period=0):
         return G * mass / planet_velocity**2
 
 
-def distance_2d(body1, body2, frame):
-    dx = body1.positions[frame][0] - body2.positions[frame][0]
-    dz = body1.positions[frame][2] - body2.positions[frame][2]
+def distance_2d_ecl(body1, body2, i):
+    dx = body1.positions[i][0] - body2.positions[i][0]
+    dz = body1.positions[i][2] - body2.positions[i][2]
     return math.sqrt((dx**2 + dz**2))
+
+
+def distance_2d_top(body1, body2, i):
+    dx = body1.positions[i][0] - body2.positions[i][0]
+    dy = body1.positions[i][1] - body2.positions[i][1]
+    return math.sqrt((dx**2 + dy**2))
 
 
 def total_luminosity(bodies, stars, frame):
@@ -211,8 +247,9 @@ def calc_position_eclipse_luminosity(bodies, lightcurve):
             movement = body1.velocity * DT - 0.5 * acceleration * DT ** 2
             body1.positions[i] = body1.positions[i-1] + movement
         lightcurve[i] = total_luminosity(bodies, stars, i)
-        if i > 0 and i % int(round(Iterations / 10)) == 0:
-            print(f'{round(i / Iterations * 100):3d}% ', end="")
+        if i==1 or i % int(round(Iterations / 10)) == 0: # i > 0 and
+            # print(f'{round(i / Iterations * 100):3d}% ', end="")
+            print(f'\n{i:12d}: {distance_2d_top(bodies[0], bodies[1], i):.4e} ', end="")
     return 0
 
 
@@ -237,11 +274,19 @@ print(f'Producing {Frames/FPS:.0f} seconds long video, covering {DT*Iterations/6
 lightcurve = np.zeros((Iterations))
 bodies = []
 init_bodies(bodies)
+
+# print(ideal_velocity(bodies[0], bodies[1]))
+# print(ideal_radius(bodies[0], bodies[1], orbital_period=1.1047*24*3600))
+# exit(1234)
+
 print(f'Calculating {Iterations:6d} iterations: ', end="")
 tic = time.perf_counter()
 calc_position_eclipse_luminosity(bodies, lightcurve)
 toc = time.perf_counter()
 print(f' 100%   {toc-tic:7.2f} seconds  ({Iterations/(toc-tic):.0f} iterations/second)')
+
+# exit(12345)
+
 sampled_lightcurve = np.take(lightcurve, range(0, Iterations, Sampling_rate))
 fig, ax_top, ax_eclipse, ax_lightcurve, red_dot = init_plot(sampled_lightcurve) # adjust constants inside this function to fit your screen
 for body in bodies:
@@ -258,5 +303,5 @@ toc = time.perf_counter()
 print(f' 100%   {toc-tic:7.2f} seconds  ({Frames/(toc-tic):.0f} frames/second)')
 print(f'{video_file} saved.')
 # https://www.ffmpeg.org/libavcodec.html
-# The libavcodec library provides anim generic encoding/decoding framework and contains multiple decoders and encoders for audio, video, subtitle streams and bitstream filters.
+# The libavcodec library provides a generic encoding/decoding framework and contains multiple decoders and encoders for audio, video, subtitle streams and bitstream filters.
 # libx264 is a library for encoding mp4 videos.
