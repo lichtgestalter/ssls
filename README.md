@@ -6,4 +6,4 @@ Usually you do not need to look at or even modify the python code. Instead contr
 SSLS uses ffmpeg to convert the data into a video. Download ffmpeg from https://www.ffmpeg.org/download.html. Extract the zip file and add "<yourdriveandpath>\FFmpeg\bin" to Environment Variable PATH.<br>
 <br>
 Your questions and comments are welcome.<br>
-Just open an issue on https://github.com/lichtgestalter/ssls/issues to get my attention :)<br>
+Just open an issue or a discussion to get my attention :)<br>
